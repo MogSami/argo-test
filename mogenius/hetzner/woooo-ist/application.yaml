@@ -1,0 +1,338 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: woooo-ist
+  namespace: mogenius-argo-cd
+  labels:
+    managed-by: mogenius
+spec:
+  destination:
+    name: in-cluster
+    namespace: sami
+  syncPolicy:
+    automated:
+      prune: true
+  project: mogenius
+  source:
+    repoURL: https://helm.mogenius.com/public
+    targetRevision: 1.2.2
+    chart: moac
+    helm:
+      releaseName: woooo-ist
+      valuesObject:
+        services:
+          - prometheus-metric-tests:
+              clusterIP: 10.43.153.25
+              clusterIPs:
+                - 10.43.153.25
+              internalTrafficPolicy: Cluster
+              ipFamilies:
+                - IPv4
+              ipFamilyPolicy: SingleStack
+              ports:
+                - name: 80-prometheus-metric-tests
+                  port: 804
+                  protocol: TCP
+                  targetPort: 80
+              selector:
+                app: my-app
+              sessionAffinity: None
+              type: ClusterIP
+          - nfs-server-pod-samis-volume:
+              clusterIP: 10.43.156.215
+              clusterIPs:
+                - 10.43.156.215
+              internalTrafficPolicy: Cluster
+              ipFamilies:
+                - IPv4
+              ipFamilyPolicy: SingleStack
+              ports:
+                - name: nfs-udp
+                  port: 2049
+                  protocol: UDP
+                  targetPort: 2049
+                - name: nfs
+                  port: 2049
+                  protocol: TCP
+                  targetPort: 2049
+                - name: rpcbind
+                  port: 111
+                  protocol: TCP
+                  targetPort: 111
+                - name: port-946
+                  port: 946
+                  protocol: TCP
+                  targetPort: 946
+                - name: mountd-49135
+                  port: 49135
+                  protocol: TCP
+                  targetPort: 49135
+                - name: mountd-2048
+                  port: 2048
+                  protocol: TCP
+                  targetPort: 2048
+                - name: lockd-2045
+                  port: 2045
+                  protocol: TCP
+                  targetPort: 2045
+                - name: statd-2046
+                  port: 2046
+                  protocol: TCP
+                  targetPort: 2046
+                - name: statd-2047
+                  port: 2047
+                  protocol: TCP
+                  targetPort: 2047
+                - name: stadtd-2045-udp
+                  port: 2045
+                  protocol: UDP
+                  targetPort: 2045
+                - name: statd-2046-udp
+                  port: 2046
+                  protocol: UDP
+                  targetPort: 2046
+                - name: statd-2047-udp
+                  port: 2047
+                  protocol: UDP
+                  targetPort: 2047
+                - name: rpcbind-udp
+                  port: 111
+                  protocol: UDP
+                  targetPort: 111
+              selector:
+                app: nfs-server-pod-samis-volume
+              sessionAffinity: None
+              type: ClusterIP
+        rawResources:
+          - apiVersion: rbac.authorization.k8s.io/v1
+            kind: Role
+            metadata:
+              name: my-role
+              namespace: sami
+            rules:
+              - apiGroups:
+                  - helm.cattle.io
+                resources:
+                  - helmcharts
+                verbs:
+                  - list
+                  - create
+                  - update
+                  - delete
+                  - deletecollection
+              - apiGroups:
+                  - apps
+                resources:
+                  - deployments
+                verbs:
+                  - '*'
+              - apiGroups:
+                  - apps
+                resources:
+                  - replicasets
+                verbs:
+                  - create
+          - apiVersion: v1
+            kind: PersistentVolumeClaim
+            metadata:
+              annotations:
+                pv.kubernetes.io/bind-completed: 'yes'
+                pv.kubernetes.io/bound-by-controller: 'yes'
+                volume.beta.kubernetes.io/storage-provisioner: rancher.io/local-path
+                volume.kubernetes.io/selected-node: test-server-sami
+                volume.kubernetes.io/storage-provisioner: rancher.io/local-path
+              finalizers:
+                - kubernetes.io/pvc-protection
+              labels:
+                app.kubernetes.io/component: master
+                app.kubernetes.io/name: redis
+              name: redis-data-harbor-redis-master-0
+              namespace: sami
+            spec:
+              accessModes:
+                - ReadWriteOnce
+              resources:
+                requests:
+                  storage: 8Gi
+              storageClassName: local-path
+              volumeMode: Filesystem
+              volumeName: pvc-2d870ead-6414-4453-a4da-5ff8e45ecce3
+          - apiVersion: v1
+            kind: PersistentVolumeClaim
+            metadata:
+              annotations:
+                pv.kubernetes.io/bind-completed: 'yes'
+                pv.kubernetes.io/bound-by-controller: 'yes'
+                volume.beta.kubernetes.io/storage-provisioner: rancher.io/local-path
+                volume.kubernetes.io/selected-node: test-server-sami
+                volume.kubernetes.io/storage-provisioner: rancher.io/local-path
+              finalizers:
+                - kubernetes.io/pvc-protection
+              labels:
+                app.kubernetes.io/component: trivy
+                app.kubernetes.io/name: harbor
+              name: data-harbor-trivy-0
+              namespace: sami
+            spec:
+              accessModes:
+                - ReadWriteOnce
+              resources:
+                requests:
+                  storage: 5Gi
+              storageClassName: local-path
+              volumeMode: Filesystem
+              volumeName: pvc-b1454de0-3bfb-42be-a2ee-36d321008611
+          - apiVersion: v1
+            kind: PersistentVolumeClaim
+            metadata:
+              annotations:
+                helm.sh/resource-policy: keep
+              finalizers:
+                - kubernetes.io/pvc-protection
+              labels:
+                app.kubernetes.io/component: registry
+                app.kubernetes.io/name: harbor
+                app.kubernetes.io/version: 2.13.1
+              name: harbor-registry
+              namespace: sami
+            spec:
+              accessModes:
+                - ReadWriteOnce
+              resources:
+                requests:
+                  storage: 5Gi
+              storageClassName: local-path
+              volumeMode: Filesystem
+          - apiVersion: v1
+            kind: PersistentVolumeClaim
+            metadata:
+              annotations:
+                pv.kubernetes.io/bind-completed: 'yes'
+                pv.kubernetes.io/bound-by-controller: 'yes'
+                volume.beta.kubernetes.io/storage-provisioner: rancher.io/local-path
+                volume.kubernetes.io/selected-node: test-server-sami
+                volume.kubernetes.io/storage-provisioner: rancher.io/local-path
+              finalizers:
+                - kubernetes.io/pvc-protection
+              labels:
+                app.kubernetes.io/component: primary
+                app.kubernetes.io/name: postgresql
+              name: data-harbor-postgresql-0
+              namespace: sami
+            spec:
+              accessModes:
+                - ReadWriteOnce
+              resources:
+                requests:
+                  storage: 8Gi
+              storageClassName: local-path
+              volumeMode: Filesystem
+              volumeName: pvc-9cbad965-115d-4112-8b83-e12139c40ce9
+          - apiVersion: v1
+            kind: PersistentVolumeClaim
+            metadata:
+              annotations:
+                pv.kubernetes.io/bind-completed: 'yes'
+                pv.kubernetes.io/bound-by-controller: 'yes'
+                volume.beta.kubernetes.io/storage-provisioner: rancher.io/local-path
+                volume.kubernetes.io/selected-node: test-server-sami
+                volume.kubernetes.io/storage-provisioner: rancher.io/local-path
+              finalizers:
+                - kubernetes.io/pvc-protection
+              labels:
+                mo-nfs-volume-identifier: nfs-server-pod-samis-volume
+                mo-nfs-volume-name: samis-volume
+              name: nfs-server-pod-samis-volume
+              namespace: sami
+            spec:
+              accessModes:
+                - ReadWriteOnce
+              resources:
+                requests:
+                  storage: 10Gi
+              storageClassName: local-path
+              volumeMode: Filesystem
+              volumeName: pvc-5a7b911b-b289-4ab4-8576-ea65bfad10c4
+          - apiVersion: v1
+            kind: PersistentVolumeClaim
+            metadata:
+              annotations:
+                pv.kubernetes.io/bind-completed: 'yes'
+              finalizers:
+                - kubernetes.io/pvc-protection
+              name: samis-volume
+              namespace: sami
+            spec:
+              accessModes:
+                - ReadWriteMany
+              resources:
+                requests:
+                  storage: 10Gi
+              storageClassName: ''
+              volumeMode: Filesystem
+              volumeName: sami-samis-volume
+          - apiVersion: v1
+            kind: PersistentVolume
+            metadata:
+              annotations:
+                pv.kubernetes.io/bound-by-controller: 'yes'
+              finalizers:
+                - kubernetes.io/pv-protection
+              labels:
+                mo-nfs-volume-identifier: nfs-server-pod-samis-volume
+                mo-nfs-volume-name: samis-volume
+              name: sami-samis-volume
+            spec:
+              accessModes:
+                - ReadWriteMany
+              capacity:
+                storage: 10Gi
+              claimRef:
+                apiVersion: v1
+                kind: PersistentVolumeClaim
+                name: samis-volume
+                namespace: sami
+                resourceVersion: '3682145'
+                uid: 828ed475-8589-4fe6-9011-6ee9b5ae4acf
+              mountOptions:
+                - nolock
+              nfs:
+                path: /exports
+                server: 10.43.156.215
+              persistentVolumeReclaimPolicy: Delete
+              volumeMode: Filesystem
+          - apiVersion: v1
+            kind: PersistentVolumeClaim
+            metadata:
+              annotations:
+                helm.sh/resource-policy: keep
+                pv.kubernetes.io/bind-completed: 'yes'
+                pv.kubernetes.io/bound-by-controller: 'yes'
+                volume.beta.kubernetes.io/storage-provisioner: rancher.io/local-path
+                volume.kubernetes.io/selected-node: test-server-sami
+                volume.kubernetes.io/storage-provisioner: rancher.io/local-path
+              finalizers:
+                - kubernetes.io/pvc-protection
+              labels:
+                app.kubernetes.io/component: jobservice
+                app.kubernetes.io/name: harbor
+                app.kubernetes.io/version: 2.13.1
+              name: harbor-jobservice
+              namespace: sami
+            spec:
+              accessModes:
+                - ReadWriteOnce
+              resources:
+                requests:
+                  storage: 1Gi
+              storageClassName: local-path
+              volumeMode: Filesystem
+              volumeName: pvc-3cedd4a8-01bd-481b-a888-2e8bcdcc5688
+        configmaps:
+          - my-configmap-k4jtg3:
+              data:
+                miau: dGVzdA==
+                sdfdsf: sdfdsf
+          - my-configmap-e9h36y:
+              data:
+                sadsadas: c2RhYXNkYQ==
