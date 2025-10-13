@@ -24,9 +24,6 @@ spec:
       valuesObject:
         services:
           - my-deployment:
-              clusterIP: 10.43.109.67
-              clusterIPs:
-                - 10.43.109.67
               internalTrafficPolicy: Cluster
               ipFamilies:
                 - IPv4
@@ -36,10 +33,19 @@ spec:
                   port: 80
                   protocol: TCP
                   targetPort: 80
+                - name: 77-my-deployment
+                  protocol: TCP
+                  port: 77
+                  targetPort: 77
               selector:
                 app: my-deployment
               sessionAffinity: None
               type: ClusterIP
+              relatedResourceUid:
+                - 0e0c492c-b355-4da5-910e-e6f3921c46b3
+              from: Pod
+              to: Service
+              selectType: selector
           - kubernetes:
               labels:
                 component: apiserver
