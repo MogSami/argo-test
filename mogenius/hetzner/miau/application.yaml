@@ -1,0 +1,106 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: miau
+  namespace: mogenius-argo-cd
+  labels:
+    managed-by: mogenius
+spec:
+  destination:
+    name: in-cluster
+    namespace: kube-public
+  syncPolicy:
+    automated:
+      prune: true
+    syncOptions:
+      - CreateNamespace=true
+  project: mogenius
+  source:
+    repoURL: https://helm.mogenius.com/public
+    targetRevision: 1.2.2
+    chart: moac
+    helm:
+      releaseName: miau
+      valuesObject:
+        configmaps: []
+        sealedSecrets: []
+        controllers: []
+        services: []
+        ingresses: []
+        rawResources:
+          - apiVersion: rbac.authorization.k8s.io/v1
+            kind: RoleBinding
+            metadata:
+              annotations:
+                rbac.authorization.kubernetes.io/autoupdate: 'true'
+              labels:
+                kubernetes.io/bootstrapping: rbac-defaults
+              name: system:controller:bootstrap-signer
+              namespace: kube-public
+            roleRef:
+              apiGroup: rbac.authorization.k8s.io
+              kind: Role
+              name: system:controller:bootstrap-signer
+            subjects:
+              - kind: ServiceAccount
+                name: bootstrap-signer
+                namespace: kube-system
+          - apiVersion: rbac.authorization.k8s.io/v1
+            kind: Role
+            metadata:
+              annotations:
+                rbac.authorization.kubernetes.io/autoupdate: 'true'
+              labels:
+                kubernetes.io/bootstrapping: rbac-defaults
+              name: system:controller:bootstrap-signer
+              namespace: kube-public
+            rules:
+              - apiGroups:
+                  - ''
+                resources:
+                  - configmaps
+                verbs:
+                  - get
+                  - list
+                  - watch
+              - apiGroups:
+                  - ''
+                resourceNames:
+                  - cluster-info
+                resources:
+                  - configmaps
+                verbs:
+                  - update
+              - apiGroups:
+                  - ''
+                resources:
+                  - events
+                verbs:
+                  - create
+                  - update
+              - apiGroups:
+                  - events.k8s.io
+                resources:
+                  - events
+                verbs:
+                  - create
+                  - update
+              - apiGroups:
+                  - helm.cattle.io
+                resources:
+                  - helmcharts
+                verbs:
+                  - get
+                  - watch
+              - apiGroups:
+                  - ''
+                resources:
+                  - events
+                verbs:
+                  - patch
+              - apiGroups:
+                  - events.k8s.io
+                resources:
+                  - events
+                verbs:
+                  - patch
