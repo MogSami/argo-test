@@ -115,7 +115,9 @@ spec:
           - apiVersion: apps/v1
             kind: Deployment
             metadata:
-              annotations: {}
+              annotations:
+                gitRepository: ''
+                gitBranch: ''
               name: my-deployment
               namespace: default
             spec:
