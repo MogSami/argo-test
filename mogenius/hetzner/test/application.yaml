@@ -137,7 +137,10 @@ spec:
           - apiVersion: apps/v1
             kind: Deployment
             metadata:
-              annotations: {}
+              annotations:
+                gitRepository: https://github.com/MogSami/argo-test.git
+                gitBranch: dev
+                gitWorkflow: test.yaml
               name: my-deployment
               namespace: default
             spec:
@@ -169,6 +172,8 @@ spec:
                   schedulerName: default-scheduler
                   securityContext: {}
                   terminationGracePeriodSeconds: 30
+                  imagePullSecrets:
+                    - name: image-pull-secret-ghcr-ve8bav
         ingresses:
           - ingress-prometheus-kube-prometheus-stack-prometheus:
               labels:
